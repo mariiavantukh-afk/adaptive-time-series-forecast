@@ -1,23 +1,12 @@
-# Адаптивне прогнозування часових рядів
+# Time Series Analytics — bilingual research application
 
-Україномовний застосунок Streamlit для аналізу часових рядів: статистика, ADF/KPSS, STL, PELT, SARIMA, State-Space/Kalman, прогнозні інтервали. У репозиторії є підготовлений добовий ряд електричного навантаження Італії за 2016–2025 роки та збережені результати перевірки прогнозів за 2025 рік.
+A Streamlit application for stochastic time-series analysis, SARIMA and state-space forecasting, interval estimates, STL decomposition, ADF/KPSS and PELT.
 
-## Запуск
+## Language
+Use the **Мова / Language** selector in the sidebar to switch between Ukrainian and English. The English translation covers navigation and principal controls; some research annotations and exported labels remain in Ukrainian in this version.
 
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
+## Forecasting
+SARIMA can be fitted manually with p,d,q,P,D,Q and seasonal period s, or chosen by a bounded AIC search over 18 candidates. This is not a global optimization and does not establish forecasting superiority. Forecasts and intervals are recomputed from the currently selected dataset. Historical ENTSO-E 2025 benchmark results remain separately labeled and are not recomputed for uploaded files.
 
-## Публікація в Streamlit Community Cloud
-
-1. Завантажте **вміст** цієї папки в корінь публічного GitHub-репозиторію (збережіть папку `data`).
-2. У Streamlit Cloud виберіть репозиторій, гілку `main`, головний файл `app.py`.
-3. Натисніть Deploy. Не додавайте секретів або особистих даних до публічного репозиторію.
-
-## Методичні застереження
-
-- Демонстраційний ряд сформовано з підготовленого набору ENTSO-E; перевіряйте метадані джерела та повноту погодинних записів перед остаточним академічним використанням.
-- Розділ «Перевірка 2025» показує попередньо обчислені прогнози, а не повторно навчені в браузері моделі.
-- PELT у застосунку реалізований через бібліотеку `ruptures`; результати залежать від частоти, штрафу й мінімального сегмента.
-- Прогнозування з вкладки «Прогнозування» оцінює модель на останніх N значеннях поточного набору даних.
+## Deploy
+Upload the contents of this folder to the root of your existing GitHub repository. Streamlit Cloud main file: `app.py`; branch: `main`. Keep `.streamlit/config.toml` and the `data` folder.
