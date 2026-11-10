@@ -11,7 +11,7 @@ from statsmodels.tsa.seasonal import STL
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.statespace.structural import UnobservedComponents
 
-st.set_page_config(page_title='Time Series Analytics | Магістерське дослідження', page_icon='📊', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title='Time Series Analytics | Research application', page_icon='📊', layout='wide', initial_sidebar_state='expanded')
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
 NAV = ['Огляд дослідження', 'Дані та підготовка', 'Статистичний аналіз', 'Стаціонарність', 'Декомпозиція STL', 'Структурні зміни PELT', 'Прогнозування', 'Порівняння моделей']
@@ -78,16 +78,18 @@ def prepare(raw,date_col,value_col,frequency):
     if frequency!='Без агрегування':df=df.resample({'Доба':'D','Тиждень':'W','Місяць':'MS'}[frequency]).mean()
     return df.dropna().astype(float)
 
-def plot_style(fig,height=430,yaxis='Електричне навантаження, МВт'):
+def plot_style(fig,height=430,yaxis=None):
+    if yaxis is None:yaxis = 'Value' if EN else 'Значення'
     fig.update_layout(height=height,margin=dict(l=18,r=18,t=34,b=20),paper_bgcolor='white',plot_bgcolor='white',font=dict(color=NAVY),legend=dict(orientation='h',y=1.12,x=0),hovermode='x unified',xaxis=dict(showgrid=False,title='Дата'),yaxis=dict(title=yaxis,gridcolor='#E9EEF5'))
     return fig
 
-def line_figure(x,y,label='Навантаження',color=TEAL):
+def line_figure(x,y,label=None,color=TEAL):
+    if label is None:label = 'Series' if EN else 'Часовий ряд'
     fig=go.Figure(go.Scatter(x=x,y=y,name=label,line=dict(color=color,width=2)))
     return plot_style(fig)
 
 def section(title,subtitle=None):
-    st.markdown(f'<div class="eyebrow">МАГІСТЕРСЬКЕ ДОСЛІДЖЕННЯ</div><h2 style="margin-top:0">{title}</h2>',unsafe_allow_html=True)
+    st.markdown(f'<div class="eyebrow">{"MASTER’S RESEARCH" if EN else "МАГІСТЕРСЬКЕ ДОСЛІДЖЕННЯ"}</div><h2 style="margin-top:0">{title}</h2>',unsafe_allow_html=True)
     if subtitle:st.caption(subtitle)
 
 def date_index(series,steps):
@@ -98,71 +100,78 @@ def date_index(series,steps):
         else:raise ValueError('Для прогнозування потрібен регулярний часовий індекс. Оберіть агрегацію «Доба», «Тиждень» або «Місяць».')
     return pd.date_range(start=series.index[-1],periods=steps+1,freq=freq)[1:]
 
+language = st.sidebar.selectbox('Мова / Language', ['Українська', 'English'], key='ui_language')
+EN = language == 'English'
+TRANSLATIONS = {'Огляд дослідження': 'Research overview', 'Дані та підготовка': 'Data preparation', 'Статистичний аналіз': 'Statistical analysis', 'Стаціонарність': 'Stationarity', 'Декомпозиція STL': 'STL decomposition', 'Структурні зміни PELT': 'PELT change points', 'Прогнозування': 'Forecasting', 'Порівняння моделей': 'Model comparison', 'Навігація': 'Navigation', 'Джерело даних': 'Data source', 'Завантажити CSV або XLSX': 'Upload CSV or XLSX', 'Стовпець дати': 'Date column', 'Числова змінна': 'Numeric variable', 'Агрегування': 'Aggregation', 'Без агрегування': 'No aggregation', 'Доба': 'Daily', 'Тиждень': 'Weekly', 'Місяць': 'Monthly', 'Коректних спостережень': 'Valid observations', 'Сезонний період': 'Seasonal period', 'Горизонт прогнозу': 'Forecast horizon', 'Прогнозна модель': 'Forecast model', 'Кількість останніх спостережень для навчання': 'Training observations', 'Побудувати прогноз': 'Generate forecast', 'Обчислити точки зміни': 'Detect change points', 'Ручні параметри SARIMA': 'Manual SARIMA parameters', 'Автоматичний підбір (AIC)': 'Automatic selection (AIC)', 'Режим SARIMA': 'SARIMA mode', 'Рівень прогнозного інтервалу': 'Prediction interval confidence', 'Параметри несезонної частини': 'Nonseasonal parameters', 'Параметри сезонної частини': 'Seasonal parameters', 'Побудова прогнозів': 'Forecast generation', 'Прогнозні значення та 95% інтервали обчислюються на обраному часовому ряді.': 'Point forecasts and prediction intervals are calculated for the selected time series.', 'Порівняння прогнозних моделей': 'Forecast model comparison', 'Збережені результати окремого експерименту rolling-origin за 2025 рік.': 'Saved results from the 2025 rolling-origin experiment.', 'Перевірка стаціонарності': 'Stationarity testing', 'Сезонно-трендова декомпозиція STL': 'Seasonal-trend decomposition (STL)', 'Виявлення структурних змін методом PELT': 'Change-point detection (PELT)', 'Описова статистика та автокореляція': 'Descriptive statistics and autocorrelation', 'Вхідні дані та попередня обробка': 'Input data and preprocessing', 'Спостережень': 'Observations', 'Середнє': 'Mean', 'Мінімум': 'Minimum', 'Максимум': 'Maximum', 'Динаміка досліджуваного показника': 'Time series overview', 'Про дослідження': 'About the research', 'Джерело': 'Source', 'Медіана': 'Median', 'Стандартне відхилення': 'Standard deviation', 'Коефіцієнт варіації': 'Coefficient of variation', 'Кількість лагів': 'Number of lags', 'Вікно ковзних статистик': 'Rolling window', 'Вихідний ряд': 'Observed', 'Тренд': 'Trend', 'Сезонність': 'Seasonality', 'Залишок': 'Residual', 'Поточний ряд': 'Current series', 'Мінімальний розмір сегмента': 'Minimum segment size', 'Множник штрафу': 'Penalty multiplier', 'Виявлених точок зміни': 'Detected change points', 'Фактичні дані': 'Observed data', 'Прогноз': 'Forecast', 'Фактичні значення': 'Observed values', 'Модель': 'Model', 'Одиничний корінь': 'Unit root', 'Стаціонарність за рівнем': 'Level stationarity', 'Статистика': 'Statistic', 'Критерій': 'Test', 'Нульова гіпотеза': 'Null hypothesis', '↓ Експортувати прогноз': '↓ Export forecast', '↓ Експортувати результати тестів': '↓ Export test results', '↓ Завантажити компоненти STL': '↓ Download STL components', '↓ Експортувати сегменти': '↓ Export segments', '↓ Таблиця результатів': '↓ Export metrics', '↓ 365 прогнозів за 2025 рік': '↓ Export 2025 forecasts', 'Рядків у файлі': 'File rows', 'Частота': 'Frequency', 'Таблиця спостережень': 'Observations table', 'Контроль вихідного файлу': 'Input file quality', 'Завантажити': 'Download'}
+def tr(value):
+    return TRANSLATIONS.get(value, value) if EN else value
+
 st.sidebar.markdown('### ◈ Time Series Analytics')
-st.sidebar.caption('Дослідницька система · Python / Streamlit')
-page=st.sidebar.radio('Навігація',NAV,label_visibility='collapsed')
+st.sidebar.caption('Research system · Python / Streamlit' if EN else 'Дослідницька система · Python / Streamlit')
+page_label=st.sidebar.radio(tr('Навігація'),[tr(x) for x in NAV],label_visibility='collapsed')
+page=NAV[[tr(x) for x in NAV].index(page_label)]
 st.sidebar.divider()
-st.sidebar.markdown('#### Джерело даних')
-upload=st.sidebar.file_uploader('Завантажити CSV або XLSX',type=['csv','xlsx'])
+st.sidebar.markdown('#### '+tr('Джерело даних'))
+upload=st.sidebar.file_uploader(tr('Завантажити CSV або XLSX'),type=['csv','xlsx'])
 try:
     raw=read_file(upload) if upload else load_demo()
 except Exception as exc:
     st.error(f'Помилка читання файлу: {exc}');st.stop()
-if not upload:st.sidebar.info('Дані ENTSO-E · Італія · 2016–2025')
+if not upload:st.sidebar.info('ENTSO-E data · Italy · 2016–2025' if EN else 'Дані ENTSO-E · Італія · 2016–2025')
 cols=list(raw.columns)
 if len(cols)<2:st.error('Файл повинен містити щонайменше два стовпці: дату та значення.');st.stop()
 preferred_date=infer_date(cols)
-date_col=st.sidebar.selectbox('Стовпець дати',cols,index=cols.index(preferred_date))
+date_col=st.sidebar.selectbox(tr('Стовпець дати'),cols,index=cols.index(preferred_date))
 value_candidates=[c for c in cols if c!=date_col]
 preferred_value=infer_value(cols,date_col)
-value_col=st.sidebar.selectbox('Числова змінна',value_candidates,index=value_candidates.index(preferred_value) if preferred_value in value_candidates else 0)
-frequency=st.sidebar.selectbox('Агрегування',['Без агрегування','Доба','Тиждень','Місяць'])
+value_col=st.sidebar.selectbox(tr('Числова змінна'),value_candidates,index=value_candidates.index(preferred_value) if preferred_value in value_candidates else 0)
+frequency=st.sidebar.selectbox(tr('Агрегування'),['Без агрегування','Доба','Тиждень','Місяць'])
 series=prepare(raw,date_col,value_col,frequency)
-st.sidebar.caption(f'Коректних спостережень: {len(series):,}'.replace(',',' '))
+st.sidebar.caption((f'Valid observations: {len(series):,}' if EN else f'Коректних спостережень: {len(series):,}').replace(',',' '))
 if len(series)<15:
     st.error('Потрібно щонайменше 15 коректних спостережень. Перевірте вибір стовпців дати й числової змінної.');st.stop()
 
 if page=='Огляд дослідження':
-    st.markdown('<div class="hero"><h1>Аналітика та прогнозування часових рядів</h1><p>Адаптивне стохастичне моделювання · оцінювання невизначеності · інтервальні прогнози</p></div>',unsafe_allow_html=True)
+    st.markdown('<div class="hero"><h1>Time Series Analytics & Forecasting</h1><p>Adaptive stochastic modelling · uncertainty quantification · prediction intervals</p></div>' if EN else '<div class="hero"><h1>Аналітика та прогнозування часових рядів</h1><p>Адаптивне стохастичне моделювання · оцінювання невизначеності · інтервальні прогнози</p></div>',unsafe_allow_html=True)
     a,b,c,d=st.columns(4)
-    a.metric('Спостережень',f'{len(series):,}'.replace(',',' '))
-    b.metric('Середнє',f'{series.mean():,.0f}'.replace(',',' '))
-    c.metric('Мінімум',f'{series.min():,.0f}'.replace(',',' '))
-    d.metric('Максимум',f'{series.max():,.0f}'.replace(',',' '))
-    st.subheader('Динаміка досліджуваного показника')
+    a.metric(tr('Спостережень'),f'{len(series):,}'.replace(',',' '))
+    b.metric(tr('Середнє'),f'{series.mean():,.0f}'.replace(',',' '))
+    c.metric(tr('Мінімум'),f'{series.min():,.0f}'.replace(',',' '))
+    d.metric(tr('Максимум'),f'{series.max():,.0f}'.replace(',',' '))
+    st.subheader(tr('Динаміка досліджуваного показника'))
     st.plotly_chart(line_figure(series.index,series.values),use_container_width=True)
     a,b=st.columns([2,1])
     with a:
-        st.markdown('#### Про дослідження')
-        st.write('Система призначена для аналізу часових рядів, перевірки стаціонарності, STL-декомпозиції, пошуку структурних змін PELT, прогнозування SARIMA та State-Space/Kalman і оцінювання прогнозних інтервалів.')
+        st.markdown('#### About the research' if EN else '#### Про дослідження')
+        st.write('Analyze time series, test stationarity, perform STL decomposition and PELT change-point detection, fit SARIMA and state-space models, and quantify forecast uncertainty.' if EN else 'Система призначена для аналізу часових рядів, перевірки стаціонарності, STL-декомпозиції, пошуку структурних змін PELT, прогнозування SARIMA та State-Space/Kalman і оцінювання прогнозних інтервалів.')
     with b:
-        st.markdown('#### Джерело')
-        st.write('ENTSO-E · Італія · 2016–2025') if not upload else st.write(f'Користувацький файл: {upload.name}')
+        st.markdown('#### Source' if EN else '#### Джерело')
+        st.write('ENTSO-E · Italy · 2016–2025' if EN else 'ENTSO-E · Італія · 2016–2025') if not upload else st.write(f'Користувацький файл: {upload.name}')
         st.caption(f'Частота: {frequency}; вибрана змінна: {value_col}')
 
 elif page=='Дані та підготовка':
-    section('Вхідні дані та попередня обробка','Автоматичний вибір полів; обробка пропусків, повторів і часової частоти.')
+    section(tr('Вхідні дані та попередня обробка'),'Автоматичний вибір полів; обробка пропусків, повторів і часової частоти.')
     a,b,c=st.columns(3)
-    a.metric('Рядків у файлі',len(raw));b.metric('Коректних дат і значень',len(series));c.metric('Частота','Початкова' if frequency=='Без агрегування' else frequency)
+    a.metric(tr('Рядків у файлі'),len(raw));b.metric('Коректних дат і значень',len(series));c.metric(tr('Частота'),'Початкова' if frequency=='Без агрегування' else frequency)
     st.plotly_chart(line_figure(series.index,series.values),use_container_width=True)
-    st.subheader('Таблиця спостережень')
+    st.subheader(tr('Таблиця спостережень'))
     result=series.rename('value').reset_index().rename(columns={'index':'date'})
     st.dataframe(result,use_container_width=True,hide_index=True,height=350)
     st.download_button('↓ Експортувати підготовлений ряд (CSV)',csv_bytes(result),'prepared_timeseries.csv',mime='text/csv')
-    with st.expander('Контроль вихідного файлу'):
+    with st.expander(tr('Контроль вихідного файлу')):
         st.write('Назви полів:',cols)
         st.write('Пропущені значення за стовпцями:')
         st.dataframe(raw.isna().sum().rename('Пропуски'))
         st.caption('Повторні часові позначки усереднюються; при агрегуванні обчислюється середнє за обраний період. Пропущені значення не заповнюються вигаданими даними.')
 
 elif page=='Статистичний аналіз':
-    section('Описова статистика та автокореляція')
+    section(tr('Описова статистика та автокореляція'))
     a,b,c=st.columns(3)
-    a.metric('Стандартне відхилення',f'{series.std():,.2f}')
-    b.metric('Медіана',f'{series.median():,.2f}')
-    c.metric('Коефіцієнт варіації',f'{series.std()/abs(series.mean())*100:.2f}%' if series.mean()!=0 else '—')
+    a.metric(tr('Стандартне відхилення'),f'{series.std():,.2f}')
+    b.metric(tr('Медіана'),f'{series.median():,.2f}')
+    c.metric(tr('Коефіцієнт варіації'),f'{series.std()/abs(series.mean())*100:.2f}%' if series.mean()!=0 else '—')
     st.dataframe(series.describe().rename('Значення').to_frame(),use_container_width=True)
-    lag=st.slider('Кількість лагів',3,min(90,len(series)//2-2),min(35,len(series)//3))
+    lag=st.slider(tr('Кількість лагів'),3,min(90,len(series)//2-2),min(35,len(series)//3))
     left,right=st.columns(2)
     with left:
         fig=go.Figure(go.Bar(x=list(range(lag+1)),y=acf(series,nlags=lag,fft=True),marker_color=TEAL,name='ACF'))
@@ -172,28 +181,28 @@ elif page=='Статистичний аналіз':
         fig=go.Figure(go.Bar(x=list(range(lag+1)),y=pacf(series,nlags=lag,method='ywm'),marker_color='#3F638E',name='PACF'))
         fig.update_layout(title='Часткова автокореляція')
         st.plotly_chart(plot_style(fig,340,'Кореляція'),use_container_width=True)
-    window=st.slider('Вікно ковзних статистик',3,min(90,len(series)//2),min(7,len(series)//2))
+    window=st.slider(tr('Вікно ковзних статистик'),3,min(90,len(series)//2),min(7,len(series)//2))
     fig=go.Figure()
     fig.add_trace(go.Scatter(x=series.index,y=series,name='Ряд',line=dict(color='#B8C7D7',width=1)))
     fig.add_trace(go.Scatter(x=series.index,y=series.rolling(window).mean(),name='Ковзне середнє',line=dict(color=TEAL,width=2)))
     st.plotly_chart(plot_style(fig),use_container_width=True)
 
 elif page=='Стаціонарність':
-    section('Перевірка стаціонарності','ADF: нульова гіпотеза — одиничний корінь; KPSS: нульова гіпотеза — стаціонарність за рівнем.')
+    section(tr('Перевірка стаціонарності'),'ADF: нульова гіпотеза — одиничний корінь; KPSS: нульова гіпотеза — стаціонарність за рівнем.')
     try:
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             adf=adfuller(series,autolag='AIC')
             kp=kpss(series,regression='c',nlags='auto')
-        table=pd.DataFrame([{'Критерій':'ADF','Статистика':adf[0],'p-value':adf[1],'Нульова гіпотеза':'Одиничний корінь'},{'Критерій':'KPSS','Статистика':kp[0],'p-value':kp[1],'Нульова гіпотеза':'Стаціонарність за рівнем'}])
-        st.dataframe(table,hide_index=True,use_container_width=True)
-        st.markdown('<div class="note">ADF та KPSS перевіряють різні нульові гіпотези. Суперечливі результати можуть вказувати на складну структуру ряду; вони не встановлюють причини нестаціонарності.</div>',unsafe_allow_html=True)
-        if caught:st.caption('Застереження бібліотеки: '+'; '.join(str(w.message) for w in caught[:2]))
-        st.download_button('↓ Експортувати результати тестів',csv_bytes(table),'stationarity_tests.csv')
+        table=pd.DataFrame([{'Критерій':'ADF','Статистика':adf[0],'p-value':adf[1],'Нульова гіпотеза':'Одиничний корінь'},{'Критерій':'KPSS','Статистика':kp[0],'p-value':f'< {kp[1]:.2g}' if any('smaller than' in str(w.message).lower() for w in caught) else kp[1],'Нульова гіпотеза':'Стаціонарність за рівнем'}])
+        st.dataframe(table.rename(columns={k:tr(k) for k in table.columns}),hide_index=True,use_container_width=True)
+        st.info('ADF and KPSS test different null hypotheses. Conflicting results do not identify the cause of nonstationarity.' if EN else 'ADF та KPSS перевіряють різні нульові гіпотези. Суперечливі результати не встановлюють причини нестаціонарності.')
+        if caught:st.caption('KPSS: the reported p-value is a table bound, not an exact probability.' if EN else 'KPSS: наведене p-value є межею табличного діапазону, а не точним значенням.')
+        st.download_button(tr('↓ Експортувати результати тестів'),csv_bytes(table),'stationarity_tests.csv')
     except Exception as exc:st.warning(f'Тести неможливо виконати для цього ряду: {exc}')
 
 elif page=='Декомпозиція STL':
-    section('Сезонно-трендова декомпозиція STL')
+    section(tr('Сезонно-трендова декомпозиція STL'))
     default_period=min(7,max(2,len(series)//3))
     period=st.number_input('Сезонний період (спостережень)',min_value=2,max_value=max(2,min(365,len(series)//2-1)),value=default_period)
     if len(series)<=2*period:st.warning('Недостатньо спостережень для обраного сезонного періоду.')
@@ -206,18 +215,18 @@ elif page=='Декомпозиція STL':
         fig.update_xaxes(showgrid=False);fig.update_yaxes(gridcolor='#E9EEF5')
         st.plotly_chart(fig,use_container_width=True)
         components=pd.DataFrame({'date':series.index,'observed':series.values,'trend':fit.trend.values,'seasonal':fit.seasonal.values,'residual':fit.resid.values})
-        st.download_button('↓ Завантажити компоненти STL',csv_bytes(components),'stl_components.csv')
+        st.download_button(tr('↓ Завантажити компоненти STL'),csv_bytes(components),'stl_components.csv')
 
 elif page=='Структурні зміни PELT':
-    section('Виявлення структурних змін методом PELT','Алгоритм ruptures.Pelt, квадратична вартість сегмента (l2); кількість змін залежить від штрафу.')
+    section(tr('Виявлення структурних змін методом PELT'),'Алгоритм ruptures.Pelt, квадратична вартість сегмента (l2); кількість змін залежить від штрафу.')
     mode=st.selectbox('Агрегування для сегментації',['Місяць','Тиждень','Поточний ряд'])
     seg=series.resample('MS').mean().dropna() if mode=='Місяць' else series.resample('W').mean().dropna() if mode=='Тиждень' else series
     if len(seg)<12:st.warning('Для сегментації потрібно щонайменше 12 спостережень.');st.stop()
     a,b=st.columns(2)
-    with a:min_size=st.number_input('Мінімальний розмір сегмента',min_value=2,max_value=max(2,len(seg)//3),value=min(6,max(2,len(seg)//6)))
-    with b:multiplier=st.slider('Множник штрафу',.1,20.,3.,.1)
+    with a:min_size=st.number_input(tr('Мінімальний розмір сегмента'),min_value=2,max_value=max(2,len(seg)//3),value=min(6,max(2,len(seg)//6)))
+    with b:multiplier=st.slider(tr('Множник штрафу'),.1,20.,3.,.1)
     st.caption('Штраф = множник × дисперсія × ln(n). Це налаштування для експерименту, а не універсально оптимальне значення.')
-    if st.button('Обчислити точки зміни',type='primary'):
+    if st.button(tr('Обчислити точки зміни'),type='primary'):
         try:
             import ruptures as rpt
             penalty=float(multiplier*np.var(seg.values)*np.log(len(seg)))
@@ -228,48 +237,80 @@ elif page=='Структурні зміни PELT':
                 if stop>start:rows.append({'Початок':seg.index[start].date(),'Кінець':seg.index[stop-1].date(),'Середнє':float(seg.iloc[start:stop].mean()),'Спостережень':stop-start})
                 if stop<len(seg):fig.add_vline(x=seg.index[stop].timestamp()*1000,line_color='#D97757',line_dash='dash')
                 start=stop
-            st.metric('Виявлених точок зміни',len(stops)-1)
+            st.metric(tr('Виявлених точок зміни'),len(stops)-1)
             st.plotly_chart(fig,use_container_width=True)
             table=pd.DataFrame(rows)
             st.dataframe(table,hide_index=True,use_container_width=True)
-            st.download_button('↓ Експортувати сегменти',csv_bytes(table),'pelt_segments.csv')
+            st.download_button(tr('↓ Експортувати сегменти'),csv_bytes(table),'pelt_segments.csv')
             st.info('Точки зміни є статистичними межами сегментів, а не доказом конкретних економічних чи соціальних причин.')
         except Exception as exc:st.error(f'Не вдалося виконати PELT: {exc}')
 
 elif page=='Прогнозування':
-    section('Побудова прогнозів','Прогнозні значення та 95% інтервали обчислюються на обраному часовому ряді.')
-    a,b,c=st.columns(3)
-    with a:model=st.selectbox('Прогнозна модель',['SARIMA(1,0,0)(1,1,0,7)','State-Space / Kalman'])
-    with b:horizon=st.number_input('Горизонт прогнозу',min_value=1,max_value=90,value=7)
-    with c:seasonal=st.number_input('Сезонний період',min_value=2,max_value=52,value=7)
+    section(tr('Побудова прогнозів'), 'Model estimates and prediction intervals are computed from the selected series.' if EN else 'Прогнозні значення та інтервали обчислюються для вибраного часового ряду.')
+    model=st.selectbox(tr('Прогнозна модель'),['SARIMA','State-Space / Kalman'])
+    c1,c2,c3=st.columns(3)
+    with c1:horizon=st.number_input(tr('Горизонт прогнозу'),min_value=1,max_value=90,value=7)
+    with c2:seasonal=st.number_input(tr('Сезонний період'),min_value=2,max_value=52,value=7)
+    with c3:confidence=st.selectbox(tr('Рівень прогнозного інтервалу'),[90,95,99],index=1)
+    order=(1,0,0); seasonal_order=(1,1,0,int(seasonal))
+    if model=='SARIMA':
+        mode=st.radio(tr('Режим SARIMA'),['Автоматичний підбір (AIC)','Ручні параметри SARIMA'],horizontal=True)
+        if mode=='Ручні параметри SARIMA':
+            st.markdown('**'+tr('Параметри несезонної частини')+'**')
+            a,b,c=st.columns(3)
+            with a:p=st.number_input('p',0,3,1)
+            with b:d=st.number_input('d',0,2,0)
+            with c:q=st.number_input('q',0,3,0)
+            st.markdown('**'+tr('Параметри сезонної частини')+'**')
+            a,b,c=st.columns(3)
+            with a:P=st.number_input('P',0,2,1)
+            with b:D=st.number_input('D',0,1,1)
+            with c:Q=st.number_input('Q',0,2,0)
+            order=(int(p),int(d),int(q));seasonal_order=(int(P),int(D),int(Q),int(seasonal))
+        else:
+            st.caption('Bounded AIC search over candidate orders; not a guarantee of optimal forecast accuracy.' if EN else 'Обмежений пошук за AIC серед кандидатів; не гарантує найкращої прогнозної точності.')
     max_train=min(1200,len(series));min_train=min(45,max_train)
-    train_size=st.slider('Кількість останніх спостережень для навчання',min_train,max_train,min(731,max_train))
-    st.caption('SARIMA: (1,0,0)(1,1,0,s). State-Space: локальний рівень і стохастична сезонність s. Горизонт вимірюється в кроках поточної частоти.')
-    if st.button('Побудувати прогноз',type='primary'):
+    train_size=st.slider(tr('Кількість останніх спостережень для навчання'),min_train,max_train,min(731,max_train))
+    if st.button(tr('Побудувати прогноз'),type='primary'):
         try:
             y=series.iloc[-train_size:]
-            if len(y)<max(45,3*seasonal):raise ValueError('Замало даних для обраного сезонного періоду.')
+            if len(y)<max(45,3*seasonal):raise ValueError('Not enough observations for this seasonal period.' if EN else 'Замало даних для обраного сезонного періоду.')
             ix=date_index(y,int(horizon))
-            with st.spinner('Оцінювання параметрів моделі...'):
-                if model.startswith('SARIMA'):
-                    fit=SARIMAX(y,order=(1,0,0),seasonal_order=(1,1,0,int(seasonal)),enforce_stationarity=False,enforce_invertibility=False).fit(disp=False,maxiter=80)
+            with st.spinner('Fitting the model…' if EN else 'Оцінювання параметрів моделі...'):
+                if model=='SARIMA':
+                    if mode=='Автоматичний підбір (AIC)':
+                        candidates=[]
+                        for od in [(0,1,1),(1,0,0),(1,1,0),(1,1,1),(2,1,0),(0,1,2)]:
+                            for sod in [(0,1,1,int(seasonal)),(1,1,0,int(seasonal)),(0,0,1,int(seasonal))]:
+                                try:
+                                    with warnings.catch_warnings():
+                                        warnings.simplefilter('ignore')
+                                        f=SARIMAX(y,order=od,seasonal_order=sod,enforce_stationarity=False,enforce_invertibility=False).fit(disp=False,maxiter=55)
+                                    if np.isfinite(f.aic) and f.mle_retvals.get('converged',False):candidates.append((float(f.aic),od,sod,f))
+                                except Exception:pass
+                        if not candidates:raise ValueError('No candidate model converged.' if EN else 'Жодна модель-кандидат не збіглася.')
+                        _,order,seasonal_order,fit=min(candidates,key=lambda x:x[0])
+                    else:
+                        fit=SARIMAX(y,order=order,seasonal_order=seasonal_order,enforce_stationarity=False,enforce_invertibility=False).fit(disp=False,maxiter=100)
+                    st.info(f'SARIMA{order} × {seasonal_order} · AIC = {fit.aic:.2f}')
                 else:fit=UnobservedComponents(y,level='local level',seasonal=int(seasonal)).fit(disp=False,maxiter=100)
-                pred=fit.get_forecast(steps=int(horizon)); ci=pred.conf_int(alpha=.05)
-            result=pd.DataFrame({'date':ix,'forecast':np.asarray(pred.predicted_mean),'lower_95':ci.iloc[:,0].to_numpy(),'upper_95':ci.iloc[:,1].to_numpy()})
+                pred=fit.get_forecast(steps=int(horizon));ci=pred.conf_int(alpha=1-confidence/100)
+            result=pd.DataFrame({'date':ix,'forecast':np.asarray(pred.predicted_mean),f'lower_{confidence}':ci.iloc[:,0].to_numpy(),f'upper_{confidence}':ci.iloc[:,1].to_numpy()})
             fig=go.Figure()
-            fig.add_trace(go.Scatter(x=y.index[-120:],y=y.iloc[-120:],name='Фактичні дані',line=dict(color=NAVY,width=2)))
-            fig.add_trace(go.Scatter(x=result.date,y=result.upper_95,mode='lines',line=dict(width=0),showlegend=False))
-            fig.add_trace(go.Scatter(x=result.date,y=result.lower_95,mode='lines',line=dict(width=0),fill='tonexty',fillcolor='rgba(8,127,140,.15)',name='95% інтервал'))
-            fig.add_trace(go.Scatter(x=result.date,y=result.forecast,name='Прогноз',line=dict(color=TEAL,width=3)))
+            fig.add_trace(go.Scatter(x=y.index[-120:],y=y.iloc[-120:],name='Observed' if EN else 'Фактичні дані',line=dict(color=NAVY,width=2)))
+            fig.add_trace(go.Scatter(x=result.date,y=result.iloc[:,-1],mode='lines',line=dict(width=0),showlegend=False))
+            fig.add_trace(go.Scatter(x=result.date,y=result.iloc[:,-2],mode='lines',line=dict(width=0),fill='tonexty',fillcolor='rgba(8,127,140,.15)',name=f'{confidence}% interval'))
+            fig.add_trace(go.Scatter(x=result.date,y=result.forecast,name='Forecast' if EN else 'Прогноз',line=dict(color=TEAL,width=3)))
             st.plotly_chart(plot_style(fig,490),use_container_width=True)
             st.dataframe(result,hide_index=True,use_container_width=True)
-            st.download_button('↓ Експортувати прогноз',csv_bytes(result),'forecast.csv')
-            if hasattr(fit,'mle_retvals') and not fit.mle_retvals.get('converged',True):st.warning('Оптимізатор не підтвердив збіжність. Інтерпретуйте результати обережно.')
-        except Exception as exc:st.error(f'Прогноз не побудовано: {exc}')
+            st.download_button(tr('↓ Експортувати прогноз'),csv_bytes(result),'forecast.csv')
+            if hasattr(fit,'mle_retvals') and not fit.mle_retvals.get('converged',True):st.warning('Optimization did not converge.' if EN else 'Оптимізатор не підтвердив збіжність.')
+        except Exception as exc:st.error(f'Forecast failed: {exc}' if EN else f'Прогноз не побудовано: {exc}')
 
 elif page=='Порівняння моделей':
-    section('Порівняння прогнозних моделей','Збережені результати окремого експерименту rolling-origin за 2025 рік.')
-    st.markdown('<div class="note">Це раніше обчислені результати для ENTSO-E, Італія, 2025. Вони не перераховуються автоматично при завантаженні іншого файлу.</div>',unsafe_allow_html=True)
+    section(tr('Порівняння прогнозних моделей'),'Збережені результати окремого експерименту rolling-origin за 2025 рік.')
+    st.info('Saved ENTSO-E 2025 benchmark. Uploading a different dataset does not recompute these historical benchmarks.' if EN else 'Збережений експеримент ENTSO-E за 2025 рік. Для іншого набору даних ці показники не підставляються як нові результати.')
+    if upload:st.warning('These benchmarks refer to ENTSO-E only. Use Forecasting to fit your uploaded series.' if EN else 'Наведені нижче показники стосуються лише ENTSO-E. Для завантаженого ряду використайте розділ «Прогнозування».')
     try:
         val,metrics=load_validation()
         mapping={'Seasonal naive':'Сезонна наївна','SARIMA(1,0,0)(1,1,0,7)':'SARIMA','State-space local level seasonal 7':'State-Space/Kalman'}
@@ -289,10 +330,10 @@ elif page=='Порівняння моделей':
             fig=go.Figure(go.Bar(x=coverage['model'],y=coverage['PICP_95_pct'],marker_color=TEAL,name='PICP'))
             fig.add_hline(y=95,line_dash='dash',line_color='#D97757',annotation_text='Номінальні 95%')
             st.plotly_chart(plot_style(fig,360,'Покриття, %'),use_container_width=True)
-        st.download_button('↓ Таблиця результатів',csv_bytes(metrics),'italy_2025_rolling_metrics.csv')
-        st.download_button('↓ 365 прогнозів за 2025 рік',csv_bytes(val),'italy_2025_rolling_forecasts.csv')
-        st.caption('Відмінність моделей у цьому експерименті не доводить ефективності адаптації за PELT; вона потребує окремої перевірки.')
+        st.download_button(tr('↓ Таблиця результатів'),csv_bytes(metrics),'italy_2025_rolling_metrics.csv')
+        st.download_button(tr('↓ 365 прогнозів за 2025 рік'),csv_bytes(val),'italy_2025_rolling_forecasts.csv')
+        st.caption('Model differences in this experiment do not establish the effectiveness of PELT-based adaptation; separate validation is required.' if EN else 'Відмінність моделей у цьому експерименті не доводить ефективності адаптації за PELT; вона потребує окремої перевірки.')
     except Exception as exc:st.error(f'Неможливо відкрити результати: {exc}')
 
 st.divider()
-st.caption('Дослідницький застосунок для магістерської роботи · Дані ENTSO-E, Італія · Результати залежать від вибірки, параметрів і методики валідації.')
+st.caption('Research application · Results depend on the dataset, parameters and validation method.' if EN else 'Дослідницький застосунок · Результати залежать від даних, параметрів і методики валідації.')
