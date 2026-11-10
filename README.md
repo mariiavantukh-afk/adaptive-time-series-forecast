@@ -1,23 +1,38 @@
-# Adaptive Time Series Lab — Thesis Research Application
+# Adaptive Time Series Lab — final UI edition
 
-A bilingual (Ukrainian / English) Streamlit research app for nonstationary time series, stochastic forecasting and uncertainty quantification.
+A bilingual (Ukrainian / English) research web application for adaptive stochastic modelling of nonstationary time series, prediction intervals and uncertainty assessment.
 
-## Modules
-- CSV / XLSX upload, column selection, descriptive statistics, ADF/KPSS, STL, PELT
-- SARIMA (manual order or bounded AIC search) and State-Space/Kalman forecasting
-- **Adaptive validation**: three strategies on the same rolling-origin dates:
-  1. Static (fit once)
-  2. Periodic refitting
-  3. PELT-triggered refitting on recent change points in first differences
-- Walk-forward evaluation with user-selected horizon and rolling training window
-- Raw Gaussian prediction intervals at 80/90/95/99%, optional past-error-based conformal calibration
-- MAE, RMSE, PICP, MPIW and Interval Score; exports of predictions, metrics and refit events
+## Features
 
-## Important methodology
-All backtest forecasts use only training observations before the prediction origin. Calibration uses only previously observed errors. A fixed SARIMA specification (1,0,0)(1,1,0,s) is used inside the adaptive comparison to isolate the effect of the refitting policy; the Forecasting page offers order selection. Change-point detection is applied only to the training window, never the test period. PELT is applied to first differences; it is not a causal explanation of changes. A small number of test origins is only a functional demonstration and not adequate for statistical conclusions. No results are fabricated or substituted from the historical ENTSO-E benchmark for uploaded data.
+- Upload CSV/XLSX or use the supplied historical ENTSO-E Italy 2016–2025 daily series.
+- Time series inspection, ACF/PACF, rolling statistics, ADF/KPSS, robust STL, PELT.
+- SARIMA (manual or bounded AIC selection) and local-level seasonal state-space/Kalman forecasting.
+- Adaptive walk-forward comparison: static, scheduled refitting, PELT-triggered refitting.
+- 80%, 90%, 95%, 99% intervals, empirical coverage (PICP), mean interval width (MPIW), interval score, optional historical-residual calibration.
+- Export detailed forecasts, metrics and refitting events to CSV.
 
-## Deployment
-Upload `app.py`, `adaptive_page.py`, `adaptive_engine.py`, `requirements.txt`, `.streamlit/config.toml`, and `data/` to the root of the existing GitHub repository. In Streamlit Community Cloud set the entry point to `app.py`. Python 3.11 or 3.12 is recommended. Dependencies install from `requirements.txt`.
+## Deploy
 
-## Data
-ENTSO-E Italian daily electricity load 2016–2025 is supplied as a case study. The user can upload other CSV/XLSX datasets. The original historical 2025 benchmark, when displayed, is explicitly labelled as historical and is not recalculated for a different dataset.
+Upload all files from this project directory to the **root** of the existing GitHub repository, preserving `.streamlit/config.toml` and the `data/` folder. The main file in Streamlit Community Cloud is `app.py` on branch `main`.
+
+Locally: `pip install -r requirements.txt` then `streamlit run app.py`.
+
+## Important methodological notes
+
+- All current-dataset metrics are computed on the selected series; the 2025 benchmark is explicitly marked as a separate archived experiment.
+- In the adaptive module, SARIMA order is intentionally fixed at (1,0,0)(1,1,0,s) to compare *refitting strategies* without confounding order selection. The forecasting page supports manual orders and bounded AIC search.
+- The adaptive module is a retrospective historical experiment; it does not continuously watch live data. New data are used when the user uploads them and reruns the experiment.
+- For multi-step horizons, calibration residuals are used only once their target date is already observed.
+- Conformal-style empirical calibration on very small samples has no claimed formal finite-sample guarantee under time-series dependence.
+- Small default test samples are intended to verify functionality, not to establish thesis-level statistical conclusions. Expand test periods and report compute budget, parameters and limitations.
+
+
+## Scientific checks in v5
+
+- Stationarity p-values displayed in readable scientific notation.
+- Uploaded datasets are not mixed with saved ENTSO-E benchmarks.
+- Methodology & reproducibility page includes limitations and an exportable dataset protocol.
+- PELT-triggered strategy retains the last known changepoint when no new point is detected.
+- Tested with syntax compilation; deploy and evaluate on your Streamlit Cloud instance.
+
+**Research limitation:** no software can guarantee an examiner will have no questions; report test sizes, convergence, source data, and uncertainty transparently.
