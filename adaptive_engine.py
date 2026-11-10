@@ -87,11 +87,11 @@ def run_backtest(series, model='SARIMA', seasonal=7, origins=8, horizon=1,
                 state_item['fit_origin']=origin
                 state_item['retrain_count']+=1
                 events.append({'origin':str(y.index[origin]),'strategy':strategy,'event':'fit / refit','last_detected_change':str(y.index[absolute_cp]) if absolute_cp is not None else ''})
-            if strategy=='PELT-triggered':state_item['last_cp']=absolute_cp
+            if strategy=='PELT-triggered' and absolute_cp is not None:state_item['last_cp']=absolute_cp
             # Forecast target from last fitting origin, without accessing unseen values.
             steps=target_index-state_item['fit_origin']+1
             forecast,se=one_step(state_item['fit'],steps)
-            previous=np.asarray(state_item['errors'],dtype=float)
+            previous=np.asarray([r['error'] for r in records if r['strategy']==strategy and r.get('_target_pos', 10**12)<origin],dtype=float)
             # Simple expanding conformal calibration, only after minimum past residuals.
             # Quantile of |errors|; no future outcomes included.
             calibrated=len(previous)>=calibration_size
@@ -121,8 +121,7 @@ def run_backtest(series, model='SARIMA', seasonal=7, origins=8, horizon=1,
         # append errors only after their target has become observable for next origin
         # Update only with outcomes that will be known at next origin.
         for rec in records[-len(strategies):]:rec['_target_pos']=target_index
-        for strategy in strategies:
-            state[strategy]['errors']=[r['error'] for r in records if r['strategy']==strategy and r['_target_pos']<origin+1]
+        # Calibration residuals are selected at each origin only when their target was already observed.
     detail=pd.DataFrame(records).drop(columns=['_target_pos'])
     summary=[]
     for strategy,g in detail.groupby('strategy',sort=False):
