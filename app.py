@@ -12,29 +12,61 @@ from statsmodels.tsa.seasonal import STL
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.statespace.structural import UnobservedComponents
 
-st.set_page_config(page_title='Time Series Analytics | Research application', page_icon='📊', layout='wide', initial_sidebar_state='expanded')
+st.set_page_config(page_title='Time Series Analytics | Research application', page_icon='📈', layout='wide', initial_sidebar_state='expanded')
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
-NAV = ['Огляд дослідження', 'Дані та підготовка', 'Статистичний аналіз', 'Стаціонарність', 'Декомпозиція STL', 'Структурні зміни PELT', 'Прогнозування', 'Адаптивна валідація', 'Порівняння моделей']
+NAV = ['Огляд дослідження', 'Дані та підготовка', 'Статистичний аналіз', 'Стаціонарність', 'Декомпозиція STL', 'Структурні зміни PELT', 'Прогнозування', 'Адаптивна валідація', 'Порівняння моделей', 'Методологія та відтворюваність']
 TEAL, NAVY, MUTED = '#087F8C', '#172B4D', '#60748B'
 
-st.markdown('''<style>
-.block-container {padding-top:1.3rem; padding-bottom:2.2rem; max-width:1480px}
-[data-testid="stSidebar"] {background: #EDF2F8; border-right:1px solid #DAE3ED}
-[data-testid="stSidebar"] .stRadio label {font-size:0.93rem}
-[data-testid="stMetric"] {background:white; border:1px solid #DCE5EF; border-radius:13px; padding:15px 18px; box-shadow:0 3px 12px rgba(23,43,77,.035)}
-[data-testid="stMetricLabel"] {color:#60748B}
-[data-testid="stMetricValue"] {color:#172B4D; font-size:1.65rem}
-h1,h2,h3 {color:#172B4D;letter-spacing:-.025em}
-.hero {background:linear-gradient(112deg,#172B4D,#244A68);padding:28px 30px;border-radius:17px;color:white;margin-bottom:20px}
-.hero h1 {color:white!important;font-size:2rem;margin:0 0 7px 0}
-.hero p {color:#D5E7EF;margin:0;font-size:0.95rem}
-.eyebrow {color:#087F8C;font-size:.8rem;letter-spacing:.10em;text-transform:uppercase;font-weight:700;margin-bottom:4px}
-.note {background:#E8F4F5;padding:13px 17px;border-left:4px solid #087F8C;border-radius:8px;margin:12px 0;color:#1F4854}
-.small {color:#60748B;font-size:.88rem}
-[data-testid="stPlotlyChart"] {background:white;border:1px solid #E1E8F0;border-radius:13px;padding:7px}
-.stButton>button[kind="primary"] {background:#087F8C;border-color:#087F8C}
-</style>''', unsafe_allow_html=True)
+st.markdown("""<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+html,body,[class*="css"],.stApp {font-family:'DM Sans',sans-serif}
+.stApp {background: #F5F7FB; color:#182B47}
+.block-container {padding-top:2.0rem;padding-bottom:3rem;max-width:1440px}
+[data-testid="stSidebar"] {background:linear-gradient(180deg,#102C4B 0%,#17395B 100%);border-right:0}
+[data-testid="stSidebar"] {color:#EAF2FC}
+[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,[data-testid="stSidebar"] h3,[data-testid="stSidebar"] h4,[data-testid="stSidebar"] p {color:#EAF2FC}
+[data-testid="stSidebar"] .stRadio label p {color:#EAF2FC}
+[data-testid="stSidebar"] [data-testid="stFileUploader"] {background:#F8FAFC}
+[data-testid="stSidebar"] [data-testid="stFileUploader"] p {color:#17395B!important}
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {color:#C9D7E8!important}
+[data-testid="stSidebar"] [data-baseweb="select"] * {color:#182B47!important}
+[data-testid="stSidebar"] [data-baseweb="select"] {background:white;border-radius:9px}
+[data-testid="stSidebar"] [data-testid="stFileUploader"] {border-radius:12px}
+[data-testid="stSidebar"] [data-testid="stFileUploader"] * {color:#17395B!important}
+[data-testid="stSidebar"] .stRadio label {padding:.30rem .5rem;border-radius:8px;font-size:.91rem}
+[data-testid="stSidebar"] hr {border-color:#46617E}
+h1,h2,h3 {font-family:'Manrope',sans-serif;color:#142D4E;letter-spacing:-.035em}
+h1 {font-weight:800!important} h2 {font-weight:750!important}
+[data-testid="stAppViewContainer"] {background:#F5F7FB}
+[data-testid="stVerticalBlockBorderWrapper"] {border-color:#E3EAF2}
+[data-testid="stAlert"] {border-radius:12px}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {background:#265475;border-radius:10px}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {background:#234765}
+[data-testid="stHeader"] {background:rgba(245,247,251,.94)}
+[data-testid="stMetric"] {background:#FFFFFF;border:1px solid #E0E7F0;border-radius:15px;padding:19px 20px;box-shadow:0 6px 25px rgba(15,39,70,.04)}
+[data-testid="stMetricLabel"] {color:#6C7D94}
+[data-testid="stMetricValue"] {color:#142D4E;font-family:'Manrope',sans-serif;font-size:1.65rem}
+[data-testid="stPlotlyChart"] {background:white;border:1px solid #E2E9F2;border-radius:16px;padding:12px;box-shadow:0 5px 20px rgba(15,39,70,.035)}
+[data-testid="stDataFrame"] {border-radius:12px;overflow:hidden}
+.stButton>button[kind="primary"] {background:#087F8C;border:1px solid #087F8C;border-radius:10px;font-weight:700;padding:.62rem 1.1rem}
+.stButton>button[kind="primary"]:hover {background:#066B76;border-color:#066B76}
+.stDownloadButton>button {border-radius:10px;border-color:#D3DFEC}
+[data-baseweb="tab-list"] {background:#FFFFFF;border:1px solid #E2E9F2;padding:7px;border-radius:12px;gap:7px}
+button[data-baseweb="tab"] {border-radius:8px;padding:10px 17px}
+[data-testid="stExpander"] {background:white;border:1px solid #E1E8F0;border-radius:12px}
+.hero {background:linear-gradient(115deg,#102C4B 0%,#205577 65%,#087F8C 130%);padding:34px 38px;border-radius:20px;color:white;margin-bottom:25px;box-shadow:0 10px 30px rgba(15,45,76,.14)}
+.hero h1 {color:white!important;font-size:2.2rem;margin:0 0 10px 0}
+.hero p {color:#D8E9F3;margin:0;font-size:1rem;max-width:780px}
+.eyebrow {color:#087F8C;font-size:.77rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;margin-bottom:8px}
+.note {background:#E9F4F5;padding:15px 19px;border-left:4px solid #087F8C;border-radius:9px;margin:12px 0;color:#214F5B}
+.small {color:#64748B;font-size:.89rem}
+.feature-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:16px 0 24px}
+.feature {background:white;border:1px solid #E0E7F0;border-radius:14px;padding:19px 20px}
+.feature strong {display:block;color:#142D4E;font-size:1rem;margin-bottom:6px}
+.feature span {color:#65788D;font-size:.87rem;line-height:1.45}
+@media(max-width:800px){.feature-grid{grid-template-columns:1fr}.hero{padding:22px}.hero h1{font-size:1.6rem}}
+</style>""",unsafe_allow_html=True)
 
 @st.cache_data(show_spinner=False)
 def load_demo():
@@ -81,7 +113,7 @@ def prepare(raw,date_col,value_col,frequency):
 
 def plot_style(fig,height=430,yaxis=None):
     if yaxis is None:yaxis = 'Value' if EN else 'Значення'
-    fig.update_layout(height=height,margin=dict(l=18,r=18,t=34,b=20),paper_bgcolor='white',plot_bgcolor='white',font=dict(color=NAVY),legend=dict(orientation='h',y=1.12,x=0),hovermode='x unified',xaxis=dict(showgrid=False,title='Дата'),yaxis=dict(title=yaxis,gridcolor='#E9EEF5'))
+    fig.update_layout(height=height,margin=dict(l=18,r=18,t=34,b=20),paper_bgcolor='white',plot_bgcolor='white',font=dict(color=NAVY),legend=dict(orientation='h',y=1.12,x=0),hovermode='x unified',xaxis=dict(showgrid=False,title='Date' if EN else 'Дата'),yaxis=dict(title=yaxis,gridcolor='#E9EEF5'))
     return fig
 
 def line_figure(x,y,label=None,color=TEAL):
@@ -103,12 +135,13 @@ def date_index(series,steps):
 
 language = st.sidebar.selectbox('Мова / Language', ['Українська', 'English'], key='ui_language')
 EN = language == 'English'
-TRANSLATIONS = {'Огляд дослідження': 'Research overview', 'Дані та підготовка': 'Data preparation', 'Статистичний аналіз': 'Statistical analysis', 'Стаціонарність': 'Stationarity', 'Декомпозиція STL': 'STL decomposition', 'Структурні зміни PELT': 'PELT change points', 'Прогнозування': 'Forecasting', 'Адаптивна валідація': 'Adaptive validation', 'Порівняння моделей': 'Model comparison', 'Навігація': 'Navigation', 'Джерело даних': 'Data source', 'Завантажити CSV або XLSX': 'Upload CSV or XLSX', 'Стовпець дати': 'Date column', 'Числова змінна': 'Numeric variable', 'Агрегування': 'Aggregation', 'Без агрегування': 'No aggregation', 'Доба': 'Daily', 'Тиждень': 'Weekly', 'Місяць': 'Monthly', 'Коректних спостережень': 'Valid observations', 'Сезонний період': 'Seasonal period', 'Горизонт прогнозу': 'Forecast horizon', 'Прогнозна модель': 'Forecast model', 'Кількість останніх спостережень для навчання': 'Training observations', 'Побудувати прогноз': 'Generate forecast', 'Обчислити точки зміни': 'Detect change points', 'Ручні параметри SARIMA': 'Manual SARIMA parameters', 'Автоматичний підбір (AIC)': 'Automatic selection (AIC)', 'Режим SARIMA': 'SARIMA mode', 'Рівень прогнозного інтервалу': 'Prediction interval confidence', 'Параметри несезонної частини': 'Nonseasonal parameters', 'Параметри сезонної частини': 'Seasonal parameters', 'Побудова прогнозів': 'Forecast generation', 'Прогнозні значення та 95% інтервали обчислюються на обраному часовому ряді.': 'Point forecasts and prediction intervals are calculated for the selected time series.', 'Порівняння прогнозних моделей': 'Forecast model comparison', 'Збережені результати окремого експерименту rolling-origin за 2025 рік.': 'Saved results from the 2025 rolling-origin experiment.', 'Перевірка стаціонарності': 'Stationarity testing', 'Сезонно-трендова декомпозиція STL': 'Seasonal-trend decomposition (STL)', 'Виявлення структурних змін методом PELT': 'Change-point detection (PELT)', 'Описова статистика та автокореляція': 'Descriptive statistics and autocorrelation', 'Вхідні дані та попередня обробка': 'Input data and preprocessing', 'Спостережень': 'Observations', 'Середнє': 'Mean', 'Мінімум': 'Minimum', 'Максимум': 'Maximum', 'Динаміка досліджуваного показника': 'Time series overview', 'Про дослідження': 'About the research', 'Джерело': 'Source', 'Медіана': 'Median', 'Стандартне відхилення': 'Standard deviation', 'Коефіцієнт варіації': 'Coefficient of variation', 'Кількість лагів': 'Number of lags', 'Вікно ковзних статистик': 'Rolling window', 'Вихідний ряд': 'Observed', 'Тренд': 'Trend', 'Сезонність': 'Seasonality', 'Залишок': 'Residual', 'Поточний ряд': 'Current series', 'Мінімальний розмір сегмента': 'Minimum segment size', 'Множник штрафу': 'Penalty multiplier', 'Виявлених точок зміни': 'Detected change points', 'Фактичні дані': 'Observed data', 'Прогноз': 'Forecast', 'Фактичні значення': 'Observed values', 'Модель': 'Model', 'Одиничний корінь': 'Unit root', 'Стаціонарність за рівнем': 'Level stationarity', 'Статистика': 'Statistic', 'Критерій': 'Test', 'Нульова гіпотеза': 'Null hypothesis', '↓ Експортувати прогноз': '↓ Export forecast', '↓ Експортувати результати тестів': '↓ Export test results', '↓ Завантажити компоненти STL': '↓ Download STL components', '↓ Експортувати сегменти': '↓ Export segments', '↓ Таблиця результатів': '↓ Export metrics', '↓ 365 прогнозів за 2025 рік': '↓ Export 2025 forecasts', 'Рядків у файлі': 'File rows', 'Частота': 'Frequency', 'Таблиця спостережень': 'Observations table', 'Контроль вихідного файлу': 'Input file quality', 'Завантажити': 'Download'}
+TRANSLATIONS = {'Методологія та відтворюваність': 'Methodology & reproducibility', 'Огляд дослідження': 'Research overview', 'Дані та підготовка': 'Data preparation', 'Статистичний аналіз': 'Statistical analysis', 'Стаціонарність': 'Stationarity', 'Декомпозиція STL': 'STL decomposition', 'Структурні зміни PELT': 'PELT change points', 'Прогнозування': 'Forecasting', 'Адаптивна валідація': 'Adaptive validation', 'Порівняння моделей': 'Model comparison', 'Навігація': 'Navigation', 'Джерело даних': 'Data source', 'Завантажити CSV або XLSX': 'Upload CSV or XLSX', 'Стовпець дати': 'Date column', 'Числова змінна': 'Numeric variable', 'Агрегування': 'Aggregation', 'Без агрегування': 'No aggregation', 'Доба': 'Daily', 'Тиждень': 'Weekly', 'Місяць': 'Monthly', 'Коректних спостережень': 'Valid observations', 'Сезонний період': 'Seasonal period', 'Горизонт прогнозу': 'Forecast horizon', 'Прогнозна модель': 'Forecast model', 'Кількість останніх спостережень для навчання': 'Training observations', 'Побудувати прогноз': 'Generate forecast', 'Обчислити точки зміни': 'Detect change points', 'Ручні параметри SARIMA': 'Manual SARIMA parameters', 'Автоматичний підбір (AIC)': 'Automatic selection (AIC)', 'Режим SARIMA': 'SARIMA mode', 'Рівень прогнозного інтервалу': 'Prediction interval confidence', 'Параметри несезонної частини': 'Nonseasonal parameters', 'Параметри сезонної частини': 'Seasonal parameters', 'Побудова прогнозів': 'Forecast generation', 'Прогнозні значення та 95% інтервали обчислюються на обраному часовому ряді.': 'Point forecasts and prediction intervals are calculated for the selected time series.', 'Порівняння прогнозних моделей': 'Forecast model comparison', 'Збережені результати окремого експерименту rolling-origin за 2025 рік.': 'Saved results from the 2025 rolling-origin experiment.', 'Перевірка стаціонарності': 'Stationarity testing', 'Сезонно-трендова декомпозиція STL': 'Seasonal-trend decomposition (STL)', 'Виявлення структурних змін методом PELT': 'Change-point detection (PELT)', 'Описова статистика та автокореляція': 'Descriptive statistics and autocorrelation', 'Вхідні дані та попередня обробка': 'Input data and preprocessing', 'Спостережень': 'Observations', 'Середнє': 'Mean', 'Мінімум': 'Minimum', 'Максимум': 'Maximum', 'Динаміка досліджуваного показника': 'Time series overview', 'Про дослідження': 'About the research', 'Джерело': 'Source', 'Медіана': 'Median', 'Стандартне відхилення': 'Standard deviation', 'Коефіцієнт варіації': 'Coefficient of variation', 'Кількість лагів': 'Number of lags', 'Вікно ковзних статистик': 'Rolling window', 'Вихідний ряд': 'Observed', 'Тренд': 'Trend', 'Сезонність': 'Seasonality', 'Залишок': 'Residual', 'Поточний ряд': 'Current series', 'Мінімальний розмір сегмента': 'Minimum segment size', 'Множник штрафу': 'Penalty multiplier', 'Виявлених точок зміни': 'Detected change points', 'Фактичні дані': 'Observed data', 'Прогноз': 'Forecast', 'Фактичні значення': 'Observed values', 'Модель': 'Model', 'Одиничний корінь': 'Unit root', 'Стаціонарність за рівнем': 'Level stationarity', 'Статистика': 'Statistic', 'Критерій': 'Test', 'Нульова гіпотеза': 'Null hypothesis', '↓ Експортувати прогноз': '↓ Export forecast', '↓ Експортувати результати тестів': '↓ Export test results', '↓ Завантажити компоненти STL': '↓ Download STL components', '↓ Експортувати сегменти': '↓ Export segments', '↓ Таблиця результатів': '↓ Export metrics', '↓ 365 прогнозів за 2025 рік': '↓ Export 2025 forecasts', 'Рядків у файлі': 'File rows', 'Частота': 'Frequency', 'Таблиця спостережень': 'Observations table', 'Контроль вихідного файлу': 'Input file quality', 'Завантажити': 'Download'}
 def tr(value):
     return TRANSLATIONS.get(value, value) if EN else value
 
-st.sidebar.markdown('### ◈ Time Series Analytics')
-st.sidebar.caption('Research system · Python / Streamlit' if EN else 'Дослідницька система · Python / Streamlit')
+st.sidebar.markdown('### ◈ Adaptive Time Series Lab')
+st.sidebar.caption('STOCHASTIC FORECASTING  /  RESEARCH PLATFORM')
+st.sidebar.markdown('##### '+('WORKSPACE' if EN else 'РОБОЧИЙ ПРОСТІР'))
 page_label=st.sidebar.radio(tr('Навігація'),[tr(x) for x in NAV],label_visibility='collapsed')
 page=NAV[[tr(x) for x in NAV].index(page_label)]
 st.sidebar.divider()
@@ -128,27 +161,30 @@ preferred_value=infer_value(cols,date_col)
 value_col=st.sidebar.selectbox(tr('Числова змінна'),value_candidates,index=value_candidates.index(preferred_value) if preferred_value in value_candidates else 0)
 frequency=st.sidebar.selectbox(tr('Агрегування'),['Без агрегування','Доба','Тиждень','Місяць'])
 series=prepare(raw,date_col,value_col,frequency)
+if series.index.has_duplicates:
+    st.sidebar.warning('Duplicate timestamps were aggregated by their mean.' if EN else 'Повторні часові мітки агреговано середнім.')
+
 st.sidebar.caption((f'Valid observations: {len(series):,}' if EN else f'Коректних спостережень: {len(series):,}').replace(',',' '))
 if len(series)<15:
     st.error('Потрібно щонайменше 15 коректних спостережень. Перевірте вибір стовпців дати й числової змінної.');st.stop()
 
 if page=='Огляд дослідження':
-    st.markdown('<div class="hero"><h1>Time Series Analytics & Forecasting</h1><p>Adaptive stochastic modelling · uncertainty quantification · prediction intervals</p></div>' if EN else '<div class="hero"><h1>Аналітика та прогнозування часових рядів</h1><p>Адаптивне стохастичне моделювання · оцінювання невизначеності · інтервальні прогнози</p></div>',unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div style="color:#9FDEE1;font-weight:700;letter-spacing:.15em;font-size:.75rem;margin-bottom:10px">RESEARCH WORKSPACE  /  VERSION 4.0</div><h1>Adaptive Time Series Lab</h1><p>Stochastic modelling · change-point adaptation · walk-forward validation · prediction intervals</p></div>' if EN else '<div class="hero"><div style="color:#9FDEE1;font-weight:700;letter-spacing:.15em;font-size:.75rem;margin-bottom:10px">ДОСЛІДНИЦЬКА ПЛАТФОРМА  /  ВЕРСІЯ 4.0</div><h1>Адаптивне моделювання часових рядів</h1><p>Нестаціонарність · структурні зміни · адаптивне прогнозування · оцінювання невизначеності</p></div>',unsafe_allow_html=True)
     a,b,c,d=st.columns(4)
     a.metric(tr('Спостережень'),f'{len(series):,}'.replace(',',' '))
     b.metric(tr('Середнє'),f'{series.mean():,.0f}'.replace(',',' '))
     c.metric(tr('Мінімум'),f'{series.min():,.0f}'.replace(',',' '))
     d.metric(tr('Максимум'),f'{series.max():,.0f}'.replace(',',' '))
-    st.subheader(tr('Динаміка досліджуваного показника'))
-    st.plotly_chart(line_figure(series.index,series.values),use_container_width=True)
-    a,b=st.columns([2,1])
-    with a:
-        st.markdown('#### About the research' if EN else '#### Про дослідження')
-        st.write('Analyze time series, test stationarity, perform STL decomposition and PELT change-point detection, fit SARIMA and state-space models, and quantify forecast uncertainty.' if EN else 'Система призначена для аналізу часових рядів, перевірки стаціонарності, STL-декомпозиції, пошуку структурних змін PELT, прогнозування SARIMA та State-Space/Kalman і оцінювання прогнозних інтервалів.')
-    with b:
-        st.markdown('#### Source' if EN else '#### Джерело')
-        st.write('ENTSO-E · Italy · 2016–2025' if EN else 'ENTSO-E · Італія · 2016–2025') if not upload else st.write(f'Користувацький файл: {upload.name}')
-        st.caption(f'Частота: {frequency}; вибрана змінна: {value_col}')
+    st.markdown('<div class="feature-grid"><div class="feature"><strong>01 · '+('Diagnostics' if EN else 'Діагностика')+'</strong><span>ADF / KPSS · STL · ACF / PACF · PELT</span></div><div class="feature"><strong>02 · '+('Modelling' if EN else 'Моделювання')+'</strong><span>SARIMA · State-Space / Kalman · '+('automatic order selection' if EN else 'підбір параметрів')+'</span></div><div class="feature"><strong>03 · '+('Validation & uncertainty' if EN else 'Валідація та невизначеність')+'</strong><span>Walk-forward · PICP · MPIW · Interval Score</span></div></div>',unsafe_allow_html=True)
+    overview_tab,info_tab=st.tabs(['📈 '+('Series dashboard' if EN else 'Аналітична панель'),'📖 '+('Research context' if EN else 'Про дослідження')])
+    with overview_tab:
+        st.subheader(tr('Динаміка досліджуваного показника'))
+        st.plotly_chart(line_figure(series.index,series.values),use_container_width=True)
+    with info_tab:
+        st.markdown('#### '+('Purpose' if EN else 'Мета застосунку'))
+        st.write('A research platform for nonstationary time series, structural changes, adaptive stochastic models and interval forecasting. All calculations use the selected series.' if EN else 'Дослідницька платформа для аналізу нестаціонарних часових рядів, структурних змін, адаптивних стохастичних моделей та інтервальних прогнозів. Обчислення виконуються для вибраного ряду.')
+        st.info(('Dataset: ' + upload.name) if upload else ('Demo dataset: ENTSO-E · Italy · 2016–2025' if EN else 'Демонстраційний набір: ENTSO-E · Італія · 2016–2025'))
+        st.caption(('Aggregation: ' if EN else 'Агрегування: ')+str(frequency)+' · '+str(value_col))
 
 elif page=='Дані та підготовка':
     section(tr('Вхідні дані та попередня обробка'),'Автоматичний вибір полів; обробка пропусків, повторів і часової частоти.')
@@ -195,10 +231,10 @@ elif page=='Стаціонарність':
             warnings.simplefilter('always')
             adf=adfuller(series,autolag='AIC')
             kp=kpss(series,regression='c',nlags='auto')
-        table=pd.DataFrame([{'Критерій':'ADF','Статистика':adf[0],'p-value':adf[1],'Нульова гіпотеза':'Одиничний корінь'},{'Критерій':'KPSS','Статистика':kp[0],'p-value':f'< {kp[1]:.2g}' if any('smaller than' in str(w.message).lower() for w in caught) else kp[1],'Нульова гіпотеза':'Стаціонарність за рівнем'}])
+        table=pd.DataFrame([{'Критерій':'ADF','Статистика':adf[0],'p-value':f'{adf[1]:.3g}','Нульова гіпотеза':'Одиничний корінь'},{'Критерій':'KPSS','Статистика':kp[0],'p-value':f'< {kp[1]:.2g}' if any('smaller than' in str(w.message).lower() for w in caught) else f'{kp[1]:.3g}','Нульова гіпотеза':'Стаціонарність за рівнем'}])
         st.dataframe(table.rename(columns={k:tr(k) for k in table.columns}),hide_index=True,use_container_width=True)
         st.info('ADF and KPSS test different null hypotheses. Conflicting results do not identify the cause of nonstationarity.' if EN else 'ADF та KPSS перевіряють різні нульові гіпотези. Суперечливі результати не встановлюють причини нестаціонарності.')
-        if caught:st.caption('KPSS: the reported p-value is a table bound, not an exact probability.' if EN else 'KPSS: наведене p-value є межею табличного діапазону, а не точним значенням.')
+        if any('interpolation' in str(w.message).lower() for w in caught):st.caption('KPSS: the reported p-value is a table bound, not an exact probability.' if EN else 'KPSS: наведене p-value є межею табличного діапазону, а не точним значенням.')
         st.download_button(tr('↓ Експортувати результати тестів'),csv_bytes(table),'stationarity_tests.csv')
     except Exception as exc:st.warning(f'Тести неможливо виконати для цього ряду: {exc}')
 
@@ -312,9 +348,12 @@ elif page=='Адаптивна валідація':
     adaptive_page(series,EN)
 
 elif page=='Порівняння моделей':
-    section(tr('Порівняння прогнозних моделей'),'Збережені результати окремого експерименту rolling-origin за 2025 рік.')
+    section(tr('Порівняння прогнозних моделей'), 'Historical ENTSO-E benchmark (separate from current dataset)' if EN else 'Архівний експеримент ENTSO-E (окремо від поточного набору даних)')
     st.info('Saved ENTSO-E 2025 benchmark. Uploading a different dataset does not recompute these historical benchmarks.' if EN else 'Збережений експеримент ENTSO-E за 2025 рік. Для іншого набору даних ці показники не підставляються як нові результати.')
     if upload:st.warning('These benchmarks refer to ENTSO-E only. Use Forecasting to fit your uploaded series.' if EN else 'Наведені нижче показники стосуються лише ENTSO-E. Для завантаженого ряду використайте розділ «Прогнозування».')
+    if upload:
+        st.info('Open Adaptive validation to calculate a benchmark on your uploaded data.' if EN else 'Для порівняння моделей на власному наборі відкрийте «Адаптивна валідація».')
+        st.stop()
     try:
         val,metrics=load_validation()
         mapping={'Seasonal naive':'Сезонна наївна','SARIMA(1,0,0)(1,1,0,7)':'SARIMA','State-space local level seasonal 7':'State-Space/Kalman'}
@@ -339,5 +378,28 @@ elif page=='Порівняння моделей':
         st.caption('Model differences in this experiment do not establish the effectiveness of PELT-based adaptation; separate validation is required.' if EN else 'Відмінність моделей у цьому експерименті не доводить ефективності адаптації за PELT; вона потребує окремої перевірки.')
     except Exception as exc:st.error(f'Неможливо відкрити результати: {exc}')
 
+elif page=='Методологія та відтворюваність':
+    section('Methodology & reproducibility' if EN else 'Методологія та відтворюваність')
+    st.info('Research prototype: verify results before drawing scientific conclusions.' if EN else 'Дослідницький прототип: перед науковими висновками перевірте результати та припущення.')
+    protocol=pd.DataFrame([
+      {'Field':'Source','Value':upload.name if upload else 'ENTSO-E Italy 2016–2025'},
+      {'Field':'Date column','Value':str(date_col)},
+      {'Field':'Value column','Value':str(value_col)},
+      {'Field':'Aggregation','Value':str(frequency)},
+      {'Field':'Observations','Value':str(len(series))},
+      {'Field':'Start','Value':str(series.index.min())},
+      {'Field':'End','Value':str(series.index.max())},
+    ])
+    st.dataframe(protocol,hide_index=True,use_container_width=True)
+    st.markdown('### '+('Validation protocol' if EN else 'Протокол валідації'))
+    st.markdown(('**Walk-forward:** all strategies use the same forecast origins and only past data for fitting. **PELT:** changes in first differences are candidates for refitting, not proof of causal events. **Intervals:** nominal Gaussian bounds and optional calibration using past out-of-sample errors. **Limits:** AIC does not optimize test accuracy; short samples produce unstable PICP.' if EN else '**Walk-forward:** усі стратегії оцінюються на однакових датах; під час навчання використовуються лише минулі спостереження. **PELT:** зміни в перших різницях є сигналами для перенавчання, але не доводять причинних подій. **Інтервали:** гауссові межі та калібрування за минулими позавибірковими помилками. **Обмеження:** AIC не оптимізує тестову точність; короткі вибірки дають нестійку оцінку PICP.'))
+    st.markdown('### '+('Scientific references' if EN else 'Наукові джерела'))
+    st.markdown('''- Dickey & Fuller (1979), JASA; Kwiatkowski et al. (1992), Journal of Econometrics.
+- Cleveland et al. (1990), Journal of Official Statistics; Killick et al. (2012), JASA.
+- Durbin & Koopman (2012), Time Series Analysis by State Space Methods; Gneiting & Raftery (2007), JASA.''')
+    st.download_button('Download protocol' if EN else 'Завантажити протокол',protocol.to_csv(index=False).encode('utf-8-sig'),'research_protocol.csv',mime='text/csv')
+
 st.divider()
 st.caption('Research application · Results depend on the dataset, parameters and validation method.' if EN else 'Дослідницький застосунок · Результати залежать від даних, параметрів і методики валідації.')
+
+
