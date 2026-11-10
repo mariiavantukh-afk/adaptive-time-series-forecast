@@ -36,3 +36,17 @@ Locally: `pip install -r requirements.txt` then `streamlit run app.py`.
 - Tested with syntax compilation; deploy and evaluate on your Streamlit Cloud instance.
 
 **Research limitation:** no software can guarantee an examiner will have no questions; report test sizes, convergence, source data, and uncertainty transparently.
+
+## Version 6.0 — Scientific experiment
+
+The new **Scientific experiment / Науковий експеримент** page adds:
+- Naive and seasonal naive out-of-sample benchmarks on identical origins;
+- static, periodic, and PELT-triggered SARIMA / State-Space backtests;
+- out-of-sample error bias, ACF and Ljung–Box diagnostics;
+- nominal and past-error-calibrated 80/90/95/99% intervals with PICP, MPIW and interval score;
+- PELT penalty sensitivity experiments;
+- reproducibility metadata, CSV exports, and a PDF research report.
+
+The comparison is a small configurable research experiment, **not** a claim that adaptive strategies are better. Refit and tuning choices require a separate holdout for final conclusions. Historical observations are never used for fitting before their date; interval calibration uses only matured forecast errors. Rolling conformal calibration on dependent observations does not carry a distribution-free coverage guarantee.
+
+For deployment, commit `research_suite.py` next to `app.py`, alongside the other Python modules, and update `requirements.txt` (adds reportlab).
